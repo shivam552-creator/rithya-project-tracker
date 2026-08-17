@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Founder Project Dashboard</title>
+<style>
+:root{--line:#d9dce1;--text:#20242a;--muted:#667085;--soft:#f6f7f9;--dark:#202833;--red:#b42318;--redbg:#fff2f0;--amberbg:#fff8e7;--green:#176c3a;--greenbg:#edf8ef;--bluebg:#eff6ff}
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,Helvetica,sans-serif;color:var(--text);background:#fff;font-size:14px}
+.app{max-width:1550px;margin:0 auto;padding:18px}
+.top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap}
+.title{font-size:23px;font-weight:700}.subtitle{color:var(--muted);font-size:12px;margin-top:4px}
+.top-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.protect{border:1px solid #b9d8c4;background:var(--greenbg);color:var(--green);padding:8px 10px;border-radius:6px;font-size:12px;font-weight:700}
+button,input,select,textarea{font:inherit}
+button{border:1px solid var(--line);background:#fff;border-radius:5px;padding:8px 11px;cursor:pointer}
+button:hover{background:#f7f7f7}button:disabled{opacity:.55;cursor:not-allowed}
+button.primary{background:var(--dark);color:#fff;border-color:var(--dark)}button.primary:hover{background:#303a47}
+button.danger{color:var(--red);border-color:#efb5ae}
+.cards{display:grid;grid-template-columns:repeat(5,minmax(140px,1fr));gap:10px;margin:16px 0}
+.card{border:1px solid var(--line);border-radius:7px;padding:13px}.card .k{font-size:12px;color:var(--muted);margin-bottom:6px}.card .v{font-size:22px;font-weight:700}
+.section{border:1px solid var(--line);border-radius:8px;margin-top:14px;overflow:hidden}
+.section-head{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:13px 14px;background:var(--soft);border-bottom:1px solid var(--line);flex-wrap:wrap}
+.section-head h2{margin:0;font-size:16px}.section-body{padding:14px}
+.tablewrap{border:1px solid var(--line);overflow:auto}table{width:100%;border-collapse:collapse;min-width:900px}
+th{background:#f3f4f6;font-size:12px;text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);border-right:1px solid var(--line);white-space:nowrap}
+td{padding:9px 10px;border-bottom:1px solid #e7e9ec;border-right:1px solid #e7e9ec;vertical-align:middle}
+.team-row{cursor:pointer}.team-row:hover td{background:#f8fafc}.team-row.selected td{background:#eef4ff}
+.score{font-weight:700}.yes{color:var(--green);font-weight:700}.no{color:var(--red);font-weight:700}
+.tabs{display:flex;border-bottom:1px solid var(--line);overflow:auto;margin-bottom:12px}.tab{border:0;border-radius:0;background:#fff;color:var(--muted);padding:9px 13px;border-bottom:2px solid transparent;white-space:nowrap}.tab.on{font-weight:700;color:var(--text);border-bottom-color:var(--dark)}
+.employee-name{font-size:20px;font-weight:700}.employee-meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:5px}.pill{border:1px solid var(--line);border-radius:14px;padding:4px 8px;font-size:11px;background:#fff}
+.project-title{font-weight:600}.small{font-size:12px;color:var(--muted)}.row-actions{display:flex;gap:6px;white-space:nowrap}.smallbtn{font-size:12px;padding:6px 8px}
+.overdue td{background:var(--redbg)}.soon td{background:var(--amberbg)}.blocked td{background:var(--amberbg)}.done td{background:var(--greenbg);color:#335d40}
+.empty{text-align:center;color:var(--muted);padding:28px!important}
+.notice{border:1px solid #b8c8df;background:var(--bluebg);color:#334e75;border-radius:6px;padding:9px 11px;font-size:12px;margin:10px 0}
+.status{font-size:12px;color:var(--muted)}.status.error{color:var(--red)}
+.report-item{border:1px solid var(--line);border-radius:7px;margin-bottom:10px}.report-item:last-child{margin-bottom:0}.report-top{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:10px 12px;background:var(--soft);border-bottom:1px solid var(--line);flex-wrap:wrap}.report-body{padding:12px}.report{background:#f8f9fb;border:1px solid var(--line);border-radius:6px;padding:13px;white-space:pre-wrap;word-break:break-word;max-height:430px;overflow:auto;line-height:1.45}
+.modalback{position:fixed;inset:0;background:rgba(0,0,0,.32);display:flex;align-items:center;justify-content:center;padding:20px;z-index:20}.modal{width:min(520px,100%);background:#fff;border-radius:9px;border:1px solid var(--line);padding:18px;box-shadow:0 20px 60px rgba(0,0,0,.18)}.modal h3{margin:0 0 14px}.field{margin:11px 0}.field label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px}.field input,.field select{width:100%;border:1px solid var(--line);border-radius:5px;padding:9px;background:#fff}.check{display:flex;gap:8px;align-items:center;margin-top:10px}.check input{width:auto}.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}.err{min-height:16px;color:var(--red);font-size:12px;margin-top:8px}
+.hide{display:none!important}.loading{min-height:100vh;display:flex;align-items:center;justify-content:center;color:var(--muted);padding:25px;text-align:center}.loading-box{max-width:560px}.spinner{width:34px;height:34px;border:4px solid #e4e7ec;border-top-color:#344054;border-radius:50%;margin:0 auto 14px;animation:spin 1s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+@media(max-width:950px){.cards{grid-template-columns:1fr 1fr 1fr}.app{padding:10px}}@media(max-width:620px){.cards{grid-template-columns:1fr 1fr}.title{font-size:20px}}
+</style>
+</head>
+<body>
+<div id="loading" class="loading"><div class="loading-box"><div class="spinner"></div><div id="loadingText">Connecting to the founder dashboard...</div><div id="loadingError" class="err"></div><button id="retryBtn" class="hide">Retry</button></div></div>
+<div id="app" class="app hide">
+  <div class="top">
+    <div><div class="title">Founder Project Dashboard</div><div class="subtitle">View and manage every team member from one place.</div></div>
+    <div class="top-actions"><div class="protect">Founder changes do not count as employee activity</div><button id="refreshBtn">Refresh</button></div>
+  </div>
+  <div id="globalStatus" class="status"></div>
+  <div id="summaryCards" class="cards"></div>
+  <section class="section">
+    <div class="section-head"><h2>Team Overview</h2><div class="small">Click a team member to open their projects.</div></div>
+    <div class="section-body"><div class="tablewrap"><table><thead><tr><th>TEAM MEMBER</th><th>SCORE</th><th>ACTIVE</th><th>FUTURE</th><th>OVERDUE</th><th>BLOCKED</th><th>DUE SOON</th><th>REPORT TODAY</th><th>REPORTS</th></tr></thead><tbody id="teamRows"></tbody></table></div></div>
+  </section>
+  <section id="employeeSection" class="section hide">
+    <div class="section-head"><div><div id="employeeName" class="employee-name"></div><div id="employeeMeta" class="employee-meta"></div></div><button id="addBtn" class="primary">+ Add Project</button></div>
+    <div class="section-body">
+      <div class="notice">Use this portal for project assignment, project name, due date, Current/Future placement, monthly repetition, and removal. Employees should update status, progress, blockers, and daily reports from their own tracker.</div>
+      <div class="tabs"><button class="tab on" data-tab="current">Current Projects</button><button class="tab" data-tab="future">Future Projects</button><button class="tab" data-tab="closed">Completed / Cancelled</button><button class="tab" data-tab="reports">Daily Reports</button></div>
+      <div id="currentView"><div class="tablewrap"><table><thead><tr><th>PROJECT</th><th>STATUS</th><th>DUE</th><th>PROGRESS</th><th>BLOCKER</th><th>PROJECT SCORE</th><th>ACTIONS</th></tr></thead><tbody id="currentRows"></tbody></table></div></div>
+      <div id="futureView" class="hide"><div class="tablewrap"><table><thead><tr><th>PROJECT</th><th>DUE</th><th>REPEAT</th><th>LAST EMPLOYEE ACTION</th><th>ACTIONS</th></tr></thead><tbody id="futureRows"></tbody></table></div></div>
+      <div id="closedView" class="hide"><div class="tablewrap"><table><thead><tr><th>PROJECT</th><th>RESULT</th><th>DUE</th><th>CLOSED ON</th><th>NOTES</th></tr></thead><tbody id="closedRows"></tbody></table></div></div>
+      <div id="reportsView" class="hide"><div id="reportList"></div></div>
+    </div>
+  </section>
+</div>
+<div id="projectModal" class="modalback hide"><div class="modal"><h3 id="modalTitle">Add Project</h3><div class="field"><label>Team Member</label><select id="mOwner"></select></div><div class="field"><label>Project</label><input id="mTask"></div><div class="field"><label>Needed now or later?</label><select id="mWhen"><option value="now">Now - Current Projects</option><option value="later">Later - Future Projects</option></select></div><div class="field"><label>Due date</label><input id="mDue" type="date"></div><label class="check"><input id="mRepeat" type="checkbox"> Repeat every month</label><div class="field"><label>Admin note / reason</label><input id="mReason" placeholder="Optional reason for this change"></div><div class="notice">This action is recorded as a founder action and does not give employee activity points.</div><div id="modalErr" class="err"></div><div class="modal-actions"><button id="modalCancel">Cancel</button><button id="modalSave" class="primary">Save</button></div></div></div>
+<script>
+(function(){
+'use strict';
+var U='https://blsbezkugmentlgnsmwq.supabase.co';
+var K='sb_publishable_mEjNb7XSZT1tmC4a93to7w_PaYiNCYO';
+var params=new URLSearchParams(window.location.search);
+var hashParams=new URLSearchParams(window.location.hash.replace(/^#/,''));
+var T=(params.get('access')||hashParams.get('access')||'').trim();
+var TEAM=[];
+var PROJECTS=[];
+var REPORTS=[];
+var selectedOwner='';
+var activeTab='current';
+var editingId=null;
+function el(id){return document.getElementById(id);}
+function esc(value){return String(value===null||value===undefined?'':value).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function fetchWithTimeout(url,options,ms){return Promise.race([fetch(url,options),new Promise(function(_,reject){setTimeout(function(){reject(new Error('The connection took too long. Please retry.'));},ms);})]);}
+function rpc(name,args){var options={method:'POST',cache:'no-store',headers:{apikey:K,'Content-Type':'application/json'},body:JSON.stringify(args||{})};return fetchWithTimeout(U+'/rest/v1/rpc/'+name,options,15000).then(function(response){return response.text().then(function(text){var data=null;if(text){try{data=JSON.parse(text);}catch(ignore){data=text;}}if(!response.ok){throw new Error(data&&data.message?data.message:(data&&data.hint?data.hint:'Request failed'));}return data;});});}
+function fd(value){if(!value){return 'Not set';}return new Date(value+'T00:00:00').toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});}
+function fdt(value){if(!value){return '-';}return new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Kolkata',day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}).format(new Date(value));}
+function indiaDate(){var parts=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Kolkata',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());var map={};for(var i=0;i<parts.length;i++){map[parts[i].type]=parts[i].value;}return map.year+'-'+map.month+'-'+map.day;}
+function daysTo(value){if(!value){return 9999;}return Math.ceil((new Date(value+'T00:00:00')-new Date(indiaDate()+'T00:00:00'))/86400000);}
+function rowClass(project){if(project.status==='Blocked'){return 'blocked';}var days=daysTo(project.due);if(days<0){return 'overdue';}if(days<=3){return 'soon';}return '';}
+function setGlobal(message,isError){el('globalStatus').className=isError?'status error':'status';el('globalStatus').textContent=message||'';}
+function showFatal(message){el('loadingText').textContent='Unable to open the founder dashboard.';el('loadingError').textContent=message;el('retryBtn').classList.remove('hide');var spinner=document.querySelector('.spinner');if(spinner){spinner.style.display='none';}}
+function start(){if(!T){showFatal('The founder link is incomplete.');return;}el('loadingText').textContent='Checking founder access...';rpc('tracker_me',{p_token:T}).then(function(rows){var me=rows&&rows.length?rows[0]:null;if(!me||me.role!=='founder'){throw new Error('Founder access is required.');}el('loadingText').textContent='Loading team data...';return loadOverview(true);}).catch(function(error){showFatal(error.message||String(error));});}
+function loadOverview(firstLoad){setGlobal('Loading...',false);return rpc('admin_team_overview',{p_token:T}).then(function(rows){TEAM=rows||[];renderSummary();renderTeam();fillOwners();var owner=selectedOwner;if(!owner&&TEAM.length){owner=TEAM[0].owner;}if(owner){return selectOwner(owner,false);}return null;}).then(function(){setGlobal('Ready',false);if(firstLoad){el('loading').classList.add('hide');el('app').classList.remove('hide');}}).catch(function(error){setGlobal(error.message||String(error),true);if(firstLoad){throw error;}});}
+function renderSummary(){var members=TEAM.length;var active=0,overdue=0,blocked=0,reports=0;for(var i=0;i<TEAM.length;i++){active+=Number(TEAM[i].active_projects||0);overdue+=Number(TEAM[i].overdue_projects||0);blocked+=Number(TEAM[i].blocked_projects||0);if(TEAM[i].report_today){reports++;}}var values=[['Team Members',members],['Active Projects',active],['Overdue',overdue],['Blocked',blocked],['Reports Today',reports+' / '+members]];var html='';for(var j=0;j<values.length;j++){html+='<div class="card"><div class="k">'+esc(values[j][0])+'</div><div class="v">'+esc(values[j][1])+'</div></div>';}el('summaryCards').innerHTML=html;}
+function renderTeam(){if(!TEAM.length){el('teamRows').innerHTML='<tr><td colspan="9" class="empty">No team members found.</td></tr>';return;}var html='';for(var i=0;i<TEAM.length;i++){var row=TEAM[i];html+='<tr class="team-row '+(row.owner===selectedOwner?'selected':'')+'" data-owner="'+esc(row.owner)+'"><td><b>'+esc(row.display_name)+'</b></td><td class="score">'+(row.score===null?' - ':esc(row.score+'/100'))+'</td><td>'+esc(row.active_projects)+'</td><td>'+esc(row.future_projects)+'</td><td>'+esc(row.overdue_projects)+'</td><td>'+esc(row.blocked_projects)+'</td><td>'+esc(row.due_soon_projects)+'</td><td class="'+(row.report_today?'yes':'no')+'">'+(row.report_today?'Sent':'Not sent')+'</td><td>'+esc(row.reports_sent)+' / '+esc(row.reports_expected)+'</td></tr>';}el('teamRows').innerHTML=html;var nodes=document.querySelectorAll('.team-row');for(var n=0;n<nodes.length;n++){nodes[n].onclick=function(){selectOwner(this.getAttribute('data-owner'),true);};}}
+function fillOwners(){var html='';for(var i=0;i<TEAM.length;i++){html+='<option value="'+esc(TEAM[i].owner)+'">'+esc(TEAM[i].display_name)+'</option>';}el('mOwner').innerHTML=html;}
+function selectOwner(owner,scroll){selectedOwner=owner;renderTeam();var member=null;for(var i=0;i<TEAM.length;i++){if(TEAM[i].owner===owner){member=TEAM[i];break;}}el('employeeSection').classList.remove('hide');el('employeeName').textContent=member?member.display_name:owner;var meta=[['Score',member&&member.score!==null?member.score+'/100':'-'],['Active',member?member.active_projects:0],['Overdue',member?member.overdue_projects:0],['Blocked',member?member.blocked_projects:0],['Report Today',member&&member.report_today?'Sent':'Not sent']];var metaHtml='';for(var m=0;m<meta.length;m++){metaHtml+='<span class="pill">'+esc(meta[m][0])+': <b>'+esc(meta[m][1])+'</b></span>';}el('employeeMeta').innerHTML=metaHtml;setGlobal('Loading '+owner+'...',false);return Promise.all([rpc('admin_projects',{p_token:T,p_owner:owner}),rpc('admin_reports',{p_token:T,p_owner:owner,p_limit:10})]).then(function(results){PROJECTS=results[0]||[];REPORTS=results[1]||[];renderProjects();renderReports();switchTab(activeTab);setGlobal('Ready',false);if(scroll){el('employeeSection').scrollIntoView({behavior:'smooth',block:'start'});}}).catch(function(error){setGlobal(error.message||String(error),true);throw error;});}
+function renderProjects(){var current=[],future=[],closed=[];for(var i=0;i<PROJECTS.length;i++){var p=PROJECTS[i];if(p.status==='Done'||p.status==='Cancelled'){closed.push(p);}else if(p.task_bucket==='future'){future.push(p);}else{current.push(p);}}renderCurrent(current);renderFuture(future);renderClosed(closed);bindProjectButtons();}
+function renderCurrent(rows){if(!rows.length){el('currentRows').innerHTML='<tr><td colspan="7" class="empty">No current projects.</td></tr>';return;}var html='';for(var i=0;i<rows.length;i++){var p=rows[i];html+='<tr class="'+rowClass(p)+'"><td><div class="project-title">'+esc(p.task)+'</div><div class="small">Last employee action: '+esc(fdt(p.last_employee_action_at))+'</div></td><td>'+esc(p.status)+'</td><td>'+esc(fd(p.due))+'</td><td>'+esc(p.progress)+'%</td><td>'+esc(p.blocker||'-')+'</td><td>'+(p.score===null?'Protected / not active':esc(p.score+'/100'))+'</td><td><div class="row-actions"><button class="smallbtn edit" data-id="'+p.id+'">Edit</button><button class="smallbtn danger remove" data-id="'+p.id+'">Remove</button></div></td></tr>';}el('currentRows').innerHTML=html;}
+function renderFuture(rows){if(!rows.length){el('futureRows').innerHTML='<tr><td colspan="5" class="empty">No future projects.</td></tr>';return;}var html='';for(var i=0;i<rows.length;i++){var p=rows[i];html+='<tr class="'+rowClass(p)+'"><td><div class="project-title">'+esc(p.task)+'</div></td><td>'+esc(fd(p.due))+'</td><td>'+(p.repeat_monthly?'Monthly':'One-time')+'</td><td>'+esc(fdt(p.last_employee_action_at))+'</td><td><div class="row-actions"><button class="smallbtn edit" data-id="'+p.id+'">Edit</button><button class="smallbtn danger remove" data-id="'+p.id+'">Remove</button></div></td></tr>';}el('futureRows').innerHTML=html;}
+function renderClosed(rows){if(!rows.length){el('closedRows').innerHTML='<tr><td colspan="5" class="empty">No completed or cancelled projects.</td></tr>';return;}var html='';for(var i=0;i<rows.length;i++){var p=rows[i];html+='<tr class="'+(p.status==='Done'?'done':'')+'"><td><b>'+esc(p.task)+'</b></td><td>'+esc(p.status)+'</td><td>'+esc(fd(p.due))+'</td><td>'+esc(fdt(p.completed_at||p.cancelled_at))+'</td><td>'+esc(p.status==='Cancelled'?(p.cancel_reason||'Cancelled'):'100%')+'</td></tr>';}el('closedRows').innerHTML=html;}
+function bindProjectButtons(){var edits=document.querySelectorAll('.edit');for(var i=0;i<edits.length;i++){edits[i].onclick=function(){openEdit(Number(this.getAttribute('data-id')));};}var removes=document.querySelectorAll('.remove');for(var j=0;j<removes.length;j++){removes[j].onclick=function(){removeProject(Number(this.getAttribute('data-id')));};}}
+function renderReports(){if(!REPORTS.length){el('reportList').innerHTML='<div class="empty">No daily reports yet.</div>';return;}var html='';for(var i=0;i<REPORTS.length;i++){var r=REPORTS[i];html+='<div class="report-item"><div class="report-top"><div><b>'+esc(fd(r.work_date))+'</b><div class="small">Generated '+esc(fdt(r.generated_at))+'</div></div><button class="smallbtn copy-report" data-index="'+i+'">Copy</button></div><div class="report-body"><div class="report">'+esc(r.report_text)+'</div></div></div>';}el('reportList').innerHTML=html;var buttons=document.querySelectorAll('.copy-report');for(var b=0;b<buttons.length;b++){buttons[b].onclick=function(){copyReport(Number(this.getAttribute('data-index')),this);};}}
+function copyReport(index,button){var text=REPORTS[index].report_text;if(navigator.clipboard&&window.isSecureContext){navigator.clipboard.writeText(text).then(function(){flashCopied(button);}).catch(function(){fallbackCopy(text,button);});}else{fallbackCopy(text,button);}}
+function fallbackCopy(text,button){var area=document.createElement('textarea');area.value=text;area.style.position='fixed';area.style.opacity='0';document.body.appendChild(area);area.select();try{document.execCommand('copy');flashCopied(button);}catch(ignore){alert('Copy failed. Select the report text manually.');}document.body.removeChild(area);}
+function flashCopied(button){var old=button.textContent;button.textContent='Copied';setTimeout(function(){button.textContent=old;},1200);}
+function switchTab(name){activeTab=name;var tabs=document.querySelectorAll('.tab');for(var i=0;i<tabs.length;i++){tabs[i].classList.toggle('on',tabs[i].getAttribute('data-tab')===name);}var names=['current','future','closed','reports'];for(var j=0;j<names.length;j++){el(names[j]+'View').classList.toggle('hide',names[j]!==name);}}
+function openAdd(){editingId=null;el('modalTitle').textContent='Add Project';el('mOwner').disabled=false;el('mOwner').value=selectedOwner||(TEAM.length?TEAM[0].owner:'');el('mTask').value='';el('mWhen').value='now';el('mDue').value='';el('mRepeat').checked=false;el('mReason').value='';el('modalErr').textContent='';el('projectModal').classList.remove('hide');}
+function openEdit(id){var project=null;for(var i=0;i<PROJECTS.length;i++){if(Number(PROJECTS[i].id)===id){project=PROJECTS[i];break;}}if(!project){return;}editingId=id;el('modalTitle').textContent='Edit Project';el('mOwner').disabled=true;el('mOwner').value=project.owner;el('mTask').value=project.task;el('mWhen').value=project.task_bucket==='current'?'now':'later';el('mDue').value=project.due||'';el('mRepeat').checked=!!project.repeat_monthly;el('mReason').value='';el('modalErr').textContent='';el('projectModal').classList.remove('hide');}
+function closeModal(){el('projectModal').classList.add('hide');editingId=null;}
+function saveModal(){el('modalErr').textContent='';el('modalSave').disabled=true;var common={p_token:T,p_task:el('mTask').value,p_due:el('mDue').value||null,p_needed_when:el('mWhen').value,p_repeat_monthly:el('mRepeat').checked,p_reason:el('mReason').value||null};var action;if(editingId!==null){action=rpc('admin_edit_project',{p_token:common.p_token,p_id:editingId,p_task:common.p_task,p_due:common.p_due,p_needed_when:common.p_needed_when,p_repeat_monthly:common.p_repeat_monthly,p_reason:common.p_reason,p_apply_to_scoring:false});}else{action=rpc('admin_add_project',{p_token:common.p_token,p_owner:el('mOwner').value,p_task:common.p_task,p_due:common.p_due,p_needed_when:common.p_needed_when,p_repeat_monthly:common.p_repeat_monthly,p_reason:common.p_reason});}action.then(function(){closeModal();return loadOverview(false);}).then(function(){return selectOwner(selectedOwner,false);}).catch(function(error){el('modalErr').textContent=error.message||String(error);}).finally(function(){el('modalSave').disabled=false;});}
+function removeProject(id){var project=null;for(var i=0;i<PROJECTS.length;i++){if(Number(PROJECTS[i].id)===id){project=PROJECTS[i];break;}}if(!project){return;}var untouched=!project.score_active&&!project.last_employee_action_at&&project.status==='To do'&&Number(project.progress||0)===0;var reason;if(untouched){if(!window.confirm('Delete "'+project.task+'"? It has not been activated by the employee.')){return;}reason='Deleted by founder before employee activation';}else{reason=window.prompt('This project will be cancelled and kept in history. Enter a short reason:');if(reason===null){return;}if(!reason.trim()){window.alert('A cancellation reason is required.');return;}}setGlobal('Removing project...',false);rpc('admin_remove_project',{p_token:T,p_id:id,p_reason:reason}).then(function(){return loadOverview(false);}).then(function(){return selectOwner(selectedOwner,false);}).catch(function(error){window.alert(error.message||String(error));setGlobal(error.message||String(error),true);});}
+function bindEvents(){el('retryBtn').onclick=function(){window.location.reload();};el('refreshBtn').onclick=function(){loadOverview(false);};el('addBtn').onclick=openAdd;el('modalCancel').onclick=closeModal;el('modalSave').onclick=saveModal;el('projectModal').onclick=function(event){if(event.target===el('projectModal')){closeModal();}};var tabs=document.querySelectorAll('.tab');for(var i=0;i<tabs.length;i++){tabs[i].onclick=function(){switchTab(this.getAttribute('data-tab'));};}}
+window.onerror=function(message,source,line,column){showFatal(String(message)+' (line '+line+')');return false;};
+window.onunhandledrejection=function(event){var reason=event.reason&&event.reason.message?event.reason.message:String(event.reason||'Unexpected error');showFatal(reason);};
+bindEvents();
+start();
+})();
+</script>
+</body>
+</html>
