@@ -15,7 +15,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#fff}iframe
 (function(){
   var frame=document.getElementById('tracker');
   var q=new URLSearchParams(location.search);
-  q.set('v','20260825-weighted-scoring-v3');
+  q.set('v','20260825-time-weighted-v31');
   frame.src='team-project-tracker-standard-v2-core.html?'+q.toString()+location.hash;
 
   function band(n){
@@ -56,15 +56,15 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#fff}iframe
       if(preview && preview.textContent==='No report generated yet.') preview.textContent='Project updates will stay as they are. Other work will be reduced to key highlights when the report is generated.';
 
       var formula=d.querySelector('.formula > b');
-      if(formula)formula.textContent='Overall Score = 70% Project Delivery + 20% Founder Accountability + 10% Work Consistency';
+      if(formula)formula.textContent='Overall Score = 75% Project Delivery + 15% Founder Accountability + 10% Work Consistency';
       var weights=d.querySelectorAll('.formula .weight');
       if(weights.length>=3){
-        weights[0].querySelector('strong').textContent='70%';
+        weights[0].querySelector('strong').textContent='75%';
         weights[0].querySelector('b').textContent='Project Delivery';
-        weights[0].querySelector('.note').textContent='Weighted by project size. On-time completion earns the best score. Late and overdue work falls quickly. Tiny quick jobs carry very little weight.';
-        weights[1].querySelector('strong').textContent='20%';
+        weights[0].querySelector('.note').textContent='Big projects carry more weight. A same-day quick job can count as only 0.15 of a normal project. On-time completion earns the best result. Unfinished overdue work gets negative delivery points.';
+        weights[1].querySelector('strong').textContent='15%';
         weights[1].querySelector('b').textContent='Founder Accountability';
-        weights[1].querySelector('.note').textContent='One report day counts once. Full credit needs 12 report days inside the rolling 14-day window. Repeated Generate clicks do not add marks.';
+        weights[1].querySelector('.note').textContent='One report day counts once. Repeated Generate clicks do not add marks. Consistent reporting to the founder earns this part.';
         weights[2].querySelector('strong').textContent='10%';
         weights[2].querySelector('b').textContent='Work Consistency';
         weights[2].querySelector('.note').textContent='Only real progress, completed tasks and genuine blocker updates count. Renaming, due-date edits and repeated value changes do not create a high score.';
@@ -82,7 +82,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#fff}iframe
         if(h.textContent==='ACTIVITY')h.textContent='CONSISTENCY';
       });
       var scoreNote=d.querySelector('#scoresView .note');
-      if(scoreNote)scoreNote.textContent='Score bands: 0–29 Needs Attention · 30–49 Developing · 50–64 Building Strong · 65–79 Strong · 80–89 Excellent · 90–100 Exceptional. High scores require sustained delivery and accountability.';
+      if(scoreNote)scoreNote.textContent='High scores require sustained meaningful delivery. Quick same-day work has very small weight. Late unfinished projects reduce the score. Score bands: 0–29 Needs Attention · 30–49 Developing · 50–64 Building Strong · 65–79 Strong · 80–89 Excellent · 90–100 Exceptional.';
 
       var pill=d.getElementById('scorePill');
       if(pill){
