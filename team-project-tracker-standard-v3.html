@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
+<title>Team Project Tracker</title>
+<style>
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#fff}iframe{display:block;width:100%;height:100%;border:0;background:#fff}
+</style>
+</head>
+<body>
+<iframe id="tracker" title="Project Tracker"></iframe>
+<script>
+(function(){
+  var frame=document.getElementById('tracker');
+  var q=new URLSearchParams(location.search);
+  q.set('v','20260825-unlimited-daily-work');
+  frame.src='team-project-tracker-standard-v2.html?'+q.toString()+location.hash;
+
+  function patch(){
+    try{
+      var d=frame.contentDocument;
+      if(!d)return;
+      var ta=d.getElementById('dailyNote');
+      var count=d.getElementById('charCount');
+      if(ta){
+        ta.removeAttribute('maxlength');
+        ta.setAttribute('placeholder','Write all other work completed today. No character limit. Full details are saved.');
+        ta.oninput=function(){if(count)count.textContent=this.value.length+' characters • no limit';};
+      }
+      if(count){
+        count.textContent=(ta?ta.value.length:0)+' characters • no limit';
+        if(!count.__watching){
+          count.__watching=true;
+          new MutationObserver(function(){
+            var wanted=(ta?ta.value.length:0)+' characters • no limit';
+            if(count.textContent!==wanted)count.textContent=wanted;
+          }).observe(count,{childList:true,characterData:true,subtree:true});
+        }
+      }
+      var daily=d.querySelector('.dailyhead .note');
+      if(daily)daily.textContent='Project movement is captured automatically. Add all other work here. No character limit. Full text is saved; the generated report shows only the key highlights from this extra work.';
+      var preview=d.getElementById('reportPreview');
+      if(preview && preview.textContent==='No report generated yet.'){
+        preview.textContent='Project updates will stay as they are. Other work will be reduced to key highlights when the report is generated.';
+      }
+    }catch(e){}
+  }
+
+  frame.addEventListener('load',function(){patch();setTimeout(patch,400);setTimeout(patch,1200);});
+  setInterval(patch,1500);
+})();
+</script>
+</body>
+</html>
