@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
+<title>Team Project Tracker</title>
+<style>
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#fff}iframe{display:block;width:100%;height:100%;border:0;background:#fff}
+</style>
+</head>
+<body>
+<iframe id="tracker" title="Project Tracker"></iframe>
+<script>
+(function(){
+  var frame=document.getElementById('tracker');
+  var q=new URLSearchParams(location.search);
+  var T=(q.get('access')||'').trim();
+  var U='https://blsbezkugmentlgnsmwq.supabase.co';
+  var K='sb_publishable_mEjNb7XSZT1tmC4a93to7w_PaYiNCYO';
+  var scoreLoading=false,scoreLoadedAt=0,estimateTimer=null;
+  q.set('v','20260825-scope-v4-score-explain');
+  frame.src='team-project-tracker-standard-v2-core.html?'+q.toString()+location.hash;
+
+  function rpc(name,args){
+    return fetch(U+'/rest/v1/rpc/'+name,{method:'POST',cache:'no-store',headers:{apikey:K,'Content-Type':'application/json'},body:JSON.stringify(args||{})}).then(function(r){return r.text().then(function(t){var d=null;if(t){try{d=JSON.parse(t)}catch(_){d=t}}if(!r.ok)throw new Error(d&&d.message?d.message:'Request failed');return d})});
+  }
+  function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+  function band(n){if(n>=90)return'Exceptional';if(n>=80)return'Excellent';if(n>=65)return'Strong';if(n>=50)return'Building Strong';if(n>=30)return'Developing';return'Needs Attention'}
+  function num(v){return Number(v||0).toFixed(2).replace(/\.00$/,'')}
+
+  function ensureStyles(d){
+    if(d.getElementById('scoreExplainStylesV4'))return;
+    var s=d.createElement('style');s.id='scoreExplainStylesV4';s.textContent='\
+#scoreExplainV4{margin:14px 0;border:1px solid #cfd4dc;border-radius:8px;background:#fff;overflow:hidden}\
+#scoreExplainV4 .sxHead{padding:13px 15px;background:#f7f8fa;border-bottom:1px solid #e5e7eb;display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap}\
+#scoreExplainV4 .sxBody{padding:12px 14px}\
+#scoreExplainV4 details{border:1px solid #e2e4e8;border-radius:6px;margin:8px 0;background:#fff}\
+#scoreExplainV4 summary{cursor:pointer;padding:10px 11px;font-weight:600}\
+#scoreExplainV4 .sxDetail{padding:0 11px 11px;color:#667085;line-height:1.45;font-size:12px}\
+#scoreExplainV4 .sxGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:8px 0}\
+#scoreExplainV4 .sxCard{border:1px solid #e2e4e8;border-radius:6px;padding:10px;background:#fafafa}\
+#scoreExplainV4 .sxVal{font-size:18px;font-weight:700;margin-top:4px}\
+#scoreExplainV4 .plus{color:#176c3a}.minus{color:#b42318}.muted{color:#667085;font-size:11px}\
+#scopeEstimateV4{margin:8px 0 12px;padding:10px;border:1px solid #d9dce1;background:#f8f9fb;border-radius:6px;font-size:12px;line-height:1.4}\
+@media(max-width:650px){#scoreExplainV4 .sxGrid{grid-template-columns:1fr}}';d.head.appendChild(s);
+  }
+
+  function addEstimateBox(d){
+    var addView=d.getElementById('addView'),name=d.getElementById('addName'),due=d.getElementById('addDue'),when=d.getElementById('addWhen');
+    if(!addView||!name||!due||!when)return;
+    var box=d.getElementById('scopeEstimateV4');
+    if(!box){box=d.createElement('div');box.id='scopeEstimateV4';box.innerHTML='<b>Estimated project weight</b><div class="muted">Add a project name and due date. The system estimates Quick, Small, Medium, Major or Critical automatically.</div>';var save=d.getElementById('addSave');if(save&&save.parentNode)save.parentNode.insertBefore(box,save);}
+    function schedule(){clearTimeout(estimateTimer);estimateTimer=setTimeout(function(){
+      if(!name.value.trim()){box.innerHTML='<b>Estimated project weight</b><div class="muted">Quick 0.15x · Small 0.5x · Medium 1.5x · Major 3x · Critical 4x</div>';return;}
+      box.innerHTML='<b>Estimated project weight</b><div class="muted">Checking scope...</div>';
+      rpc('tracker_estimate_project_scope',{p_token:T,p_task:name.value.trim(),p_due:due.value||null,p_needed_when:when.value}).then(function(r){var x=(r||[])[0]||{};box.innerHTML='<b>Estimated: '+esc(x.scope_label||'—')+' · '+num(x.weight)+'x</b><div class="muted">'+esc(x.reason||'')+'</div><div class="muted" style="margin-top:4px">This can adjust automatically after meaningful tasks are added or the real work duration becomes clear. Bigger scope cannot be created just by leaving a small job open longer.</div>';}).catch(function(){box.innerHTML='<b>Estimated project weight</b><div class="muted">Estimate will appear after the project is saved.</div>';});
+    },250)}
+    if(!name.__scopeV4){name.__scopeV4=true;name.addEventListener('input',schedule);due.addEventListener('change',schedule);when.addEventListener('change',schedule);schedule();}
+  }
+
+  function renderScoreExplanation(d,rows){
+    var perf=d.getElementById('performanceView');if(!perf)return;
+    var c=d.getElementById('scoreExplainV4');
+    if(!c){c=d.createElement('div');c.id='scoreExplainV4';var formula=perf.querySelector('.formula');if(formula&&formula.nextSibling)perf.insertBefore(c,formula.nextSibling);else perf.appendChild(c);}
+    var summary=(rows||[]).find(function(x){return x.section==='summary'})||{};
+    var account=(rows||[]).find(function(x){return x.section==='accountability'})||{};
+    var consistency=(rows||[]).find(function(x){return x.section==='consistency'})||{};
+    var projects=(rows||[]).filter(function(x){return x.section==='project'});
+    var html='<div class="sxHead"><div><b>Why is my score '+esc(summary.score_value==null?'—':summary.score_value)+'/100?</b><div class="muted">Click any project below to see exactly how its score and minus marks were calculated.</div></div><button id="refreshScoreExplainV4" class="small">Refresh</button></div><div class="sxBody">';
+    html+='<details open><summary>Score formula</summary><div class="sxDetail">'+esc(summary.detail||'75% Project Delivery + 15% Founder Accountability + 10% Work Consistency.')+'<br><br><b>Automatic project weights:</b> Quick 0.15x · Small 0.5x · Medium 1.5x · Major 3x · Critical 4x. Scope is estimated from planned time, number of meaningful tasks, project nature and actual completion time. Staff-created projects are automatically capped until founder review.</div></details>';
+    html+='<div class="sxGrid"><div class="sxCard"><b>Founder Accountability</b><div class="sxVal">'+esc(account.score_value==null?'—':account.score_value)+'/100</div><div class="plus">+'+num(account.earned_points)+' / 15 points earned</div><div class="muted">'+esc(account.detail||'')+'</div></div><div class="sxCard"><b>Work Consistency</b><div class="sxVal">'+esc(consistency.score_value==null?'—':consistency.score_value)+'/100</div><div class="plus">+'+num(consistency.earned_points)+' / 10 points earned</div><div class="muted">'+esc(consistency.detail||'')+'</div></div></div>';
+    html+='<div style="margin-top:12px"><b>Project Delivery breakdown</b><div class="muted">On-time/before-time work earns the best outcome. An unfinished overdue project gets a visible negative penalty. Quick work cannot create a large score jump.</div></div>';
+    if(!projects.length){html+='<div class="muted" style="padding:12px 0">No score-active project evidence yet.</div>';}
+    projects.forEach(function(x){
+      var minus=Number(x.deducted_points||0),plus=Number(x.earned_points||0);
+      html+='<details><summary>'+esc(x.title)+' · '+esc(x.scope||'')+' '+num(x.weight)+'x · '+esc(x.status||'')+' <span class="plus">+'+num(plus)+'</span>'+(minus>0?' <span class="minus">-'+num(minus)+'</span>':'')+'</summary><div class="sxDetail">'+esc(x.detail||'')+'</div></details>';
+    });
+    html+='</div>';c.innerHTML=html;
+    var b=d.getElementById('refreshScoreExplainV4');if(b)b.onclick=function(){scoreLoadedAt=0;loadScoreExplanation(d,true)};
+  }
+
+  function loadScoreExplanation(d,force){
+    if(!T||scoreLoading)return;
+    if(!force && Date.now()-scoreLoadedAt<12000)return;
+    scoreLoading=true;
+    rpc('tracker_score_explanation',{p_token:T}).then(function(r){renderScoreExplanation(d,r||[]);scoreLoadedAt=Date.now();}).catch(function(err){var perf=d.getElementById('performanceView');if(perf){var c=d.getElementById('scoreExplainV4');if(!c){c=d.createElement('div');c.id='scoreExplainV4';perf.appendChild(c)}c.innerHTML='<div class="sxBody muted">Score explanation is refreshing. '+esc(err.message||'')+'</div>';}}).finally(function(){scoreLoading=false});
+  }
+
+  function patch(){
+    try{
+      var d=frame.contentDocument;if(!d)return;if(d.title)document.title=d.title;ensureStyles(d);
+      var ta=d.getElementById('dailyNote'),count=d.getElementById('charCount');
+      if(ta){ta.removeAttribute('maxlength');ta.setAttribute('placeholder','Write all other work completed today. No character limit. Full details are saved.');ta.oninput=function(){if(count)count.textContent=this.value.length+' characters • no limit';};}
+      if(count){count.textContent=(ta?ta.value.length:0)+' characters • no limit';}
+      var daily=d.querySelector('.dailyhead .note');if(daily)daily.textContent='Project movement is captured automatically. Add all other work here. No character limit. Full text is saved; the generated report shows only the key highlights from this extra work.';
+      var preview=d.getElementById('reportPreview');if(preview&&preview.textContent==='No report generated yet.')preview.textContent='Project updates will stay as they are. Other work will be reduced to key highlights when the report is generated.';
+
+      var formula=d.querySelector('.formula > b');if(formula)formula.textContent='Overall Score = 75% Project Delivery + 15% Founder Accountability + 10% Work Consistency';
+      var weights=d.querySelectorAll('.formula .weight');
+      if(weights.length>=3){weights[0].querySelector('strong').textContent='75%';weights[0].querySelector('b').textContent='Project Delivery';weights[0].querySelector('.note').textContent='Automatic scope: Quick 0.15x, Small 0.5x, Medium 1.5x, Major 3x, Critical 4x. On-time completion earns the best result. Unfinished overdue work gets negative delivery points.';weights[1].querySelector('strong').textContent='15%';weights[1].querySelector('b').textContent='Founder Accountability';weights[1].querySelector('.note').textContent='One report day counts once. Repeated Generate clicks do not add marks. Full rolling-window credit needs consistent reporting.';weights[2].querySelector('strong').textContent='10%';weights[2].querySelector('b').textContent='Work Consistency';weights[2].querySelector('.note').textContent='Only real progress, completed tasks and genuine blocker updates count. Renaming, due-date edits and repeated value changes do not create a high score.';}
+      d.querySelectorAll('#perfCards .card .k').forEach(function(k){if(k.textContent==='Project Execution')k.textContent='Project Delivery';if(k.textContent==='Daily Reports')k.textContent='Founder Accountability';if(k.textContent==='Project Activity')k.textContent='Work Consistency';});
+      d.querySelectorAll('#performanceView table th').forEach(function(h){if(h.textContent==='PROJECT')h.textContent='DELIVERY';if(h.textContent==='REPORTS')h.textContent='ACCOUNTABILITY';if(h.textContent==='ACTIVITY')h.textContent='CONSISTENCY';});
+      var scoreNote=d.querySelector('#scoresView .note');if(scoreNote)scoreNote.textContent='High scores require sustained meaningful delivery. Quick work has very small weight. Late unfinished projects reduce the score. Score bands: 0–29 Needs Attention · 30–49 Developing · 50–64 Building Strong · 65–79 Strong · 80–89 Excellent · 90–100 Exceptional.';
+      var pill=d.getElementById('scorePill');if(pill){var m=pill.textContent.match(/(\d+)\s*\/\s*100/);if(m){var n=Number(m[1]),old=pill.querySelector('.scoreBandV3');if(!old){old=d.createElement('span');old.className='scoreBandV3';old.style.marginLeft='7px';old.style.fontSize='12px';old.style.color='#667085';pill.appendChild(old)}old.textContent='· '+band(n);}}
+      addEstimateBox(d);loadScoreExplanation(d,false);
+    }catch(e){}
+  }
+  frame.addEventListener('load',function(){patch();setTimeout(patch,300);setTimeout(patch,900)});setInterval(patch,1500);
+})();
+</script>
+</body>
+</html>
