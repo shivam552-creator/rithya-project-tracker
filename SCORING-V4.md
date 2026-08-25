@@ -58,7 +58,10 @@ Completed Projects includes a Reopen button.
 
 - Uses distinct report days in a rolling 14-day window.
 - Full credit requires 12 report days.
-- Repeated Generate Report clicks on the same day do not add marks.
+- Only one Daily Report can be submitted per staff member per work date.
+- After the first successful submission, Generate Report is disabled and the tracker shows that today's report is already submitted.
+- A second submission is also rejected at the database/backend level, so double-clicks or repeated requests cannot create another report.
+- Historical duplicate submissions do not create extra score because accountability scoring counts distinct report days, not submission clicks.
 
 ## Work Consistency
 
