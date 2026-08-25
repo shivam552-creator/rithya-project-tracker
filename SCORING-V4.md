@@ -42,6 +42,18 @@ Meaningful projects earn delivery points according to weight and outcome.
 - Bigger overdue projects create a stronger penalty than tiny work.
 - Quick jobs cannot create a large overall-score jump.
 
+## Reopening a completed project
+
+Completed Projects includes a Reopen button.
+
+- Reopen moves the project back to Current Projects.
+- If the project has tasks, the most recently completed task is reopened automatically so the project can continue.
+- If the project has no tasks, it returns as In progress at 95% so the employee can correct the remaining work.
+- The original due date is not reset. If that deadline has already passed, normal overdue penalties apply.
+- Each reopen adds a small rework penalty of 5 project-outcome points, capped at 15 points across repeated reopens.
+- My Performance shows that the project was reopened and explains the rework deduction.
+- Reopening is recorded permanently in the project reopen history.
+
 ## Founder Accountability
 
 - Uses distinct report days in a rolling 14-day window.
@@ -70,4 +82,5 @@ Every employee dashboard includes a clickable score explanation in My Performanc
 - project outcome score,
 - positive points earned,
 - negative late penalty when applicable,
+- rework/reopen deductions when applicable,
 - the reason the project received its scope/weight.
