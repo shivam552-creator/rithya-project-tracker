@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
+<title>Team Project Tracker</title>
+<style>html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#fff}iframe{display:block;width:100%;height:100%;border:0}</style>
+</head>
+<body>
+<iframe id="shell" title="Project Tracker"></iframe>
+<script>
+(function(){'use strict';
+var q=new URLSearchParams(location.search),T=(q.get('access')||'').trim();
+var U='https://blsbezkugmentlgnsmwq.supabase.co',K='sb_publishable_mEjNb7XSZT1tmC4a93to7w_PaYiNCYO';
+var shell=document.getElementById('shell'),projects=[],busy=false;
+var reportSubmitted=false,reportChecking=false,reportCheckedAt=0;
+q.set('v','20260825-one-report-v4');
+shell.src='team-project-tracker-standard-v3.html?'+q.toString()+location.hash;
+function rpc(n,a){return fetch(U+'/rest/v1/rpc/'+n,{method:'POST',cache:'no-store',headers:{apikey:K,'Content-Type':'application/json'},body:JSON.stringify(a||{})}).then(function(r){return r.text().then(function(t){var d=null;if(t){try{d=JSON.parse(t)}catch(_){d=t}}if(!r.ok)throw new Error(d&&d.message?d.message:'Request failed');return d})})}
+function coreDoc(){try{var d1=shell.contentDocument;if(!d1)return null;var inner=d1.getElementById('tracker');return inner&&inner.contentDocument?inner.contentDocument:null}catch(_){return null}}
+function loadProjects(){if(!T)return Promise.resolve();return rpc('tracker_projects',{p_token:T}).then(function(r){projects=r||[]}).catch(function(){})}
+function findProject(name){name=String(name||'').trim();return projects.find(function(p){return p.status==='Done'&&String(p.task||'').trim()===name})||null}
+function refreshCore(){var d=coreDoc();if(!d)return;var b=d.getElementById('refreshBtn');if(b)b.click();setTimeout(function(){loadProjects().then(patch)},500)}
+function reopen(p,btn){if(!p||busy)return;var ok=confirm('Bring this project back to Current Projects?\n\nIts completion will be reversed, the last completed task will reopen when tasks exist, and the score will recalculate with a small rework deduction.');if(!ok)return;busy=true;btn.disabled=true;btn.textContent='Reopening...';rpc('tracker_reopen_project',{p_token:T,p_id:Number(p.id),p_reason:'Completion reversed by team member; more work is needed'}).then(function(){refreshCore()}).catch(function(err){alert(err.message||String(err));btn.disabled=false;btn.textContent='↩ Reopen'}).finally(function(){busy=false})}
+function patchReportUi(){var d=coreDoc();if(!d)return;var b=d.getElementById('generateBtn'),msg=d.getElementById('dailyMsg');if(!b)return;
+  if(reportSubmitted){b.disabled=true;b.textContent='Report submitted ✓';b.title='Today\'s report is already submitted. Only one Daily Report is allowed per day.';if(msg)msg.textContent='Today\'s report is already submitted. Only one Daily Report is allowed per day.';}
+  else{if(b.textContent==='Report submitted ✓'){b.disabled=false;b.textContent='Generate Report';b.title='';}}
+  if(!b.__oneReportGuard){b.__oneReportGuard=true;b.addEventListener('click',function(){setTimeout(function(){checkReportStatus(true)},900)},true)}
+}
+function checkReportStatus(force){if(!T||reportChecking)return Promise.resolve();if(!force&&Date.now()-reportCheckedAt<8000){patchReportUi();return Promise.resolve();}reportChecking=true;return rpc('tracker_daily_workspace',{p_token:T,p_work_date:null}).then(function(r){var x=(r||[])[0]||{};reportSubmitted=!!x.report_generated_at;reportCheckedAt=Date.now();patchReportUi()}).catch(function(){}).finally(function(){reportChecking=false})}
+function patch(){var d=coreDoc();if(!d)return;try{
+  patchReportUi();
+  var body=d.getElementById('completedRows');if(!body)return;
+  var table=body.closest('table');if(table){var hr=table.querySelector('thead tr');if(hr&&!hr.querySelector('.reopenHead')){var th=d.createElement('th');th.className='reopenHead';th.textContent='ACTION';hr.appendChild(th)}}
+  body.querySelectorAll('tr').forEach(function(row){
+    var cells=row.querySelectorAll('td');if(!cells.length)return;
+    if(cells.length===1&&cells[0].classList.contains('empty')){cells[0].setAttribute('colspan','6');return}
+    var name=cells[0].textContent.trim(),p=findProject(name);
+    var existing=row.querySelector('.reopenCell');if(existing){if(!p)existing.innerHTML='';return}
+    var td=d.createElement('td');td.className='reopenCell';
+    if(p){var b=d.createElement('button');b.type='button';b.className='small';b.textContent='↩ Reopen';b.title='Move back to Current Projects';b.onclick=function(){reopen(p,b)};td.appendChild(b)}
+    row.appendChild(td);
+  });
+}catch(_){} }
+shell.addEventListener('load',function(){setTimeout(function(){loadProjects().then(function(){patch();checkReportStatus(true)})},700);setTimeout(patch,1600)});
+setInterval(function(){loadProjects().then(patch);checkReportStatus(false)},2000);
+})();
+</script>
+</body></html>
